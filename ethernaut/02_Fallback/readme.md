@@ -1,10 +1,10 @@
-#Fallback
+***Fallback***
 
 This challenge is meant to teach us the basics of what it means to pwn a contract. Generally, this means to gain control of the funds or roles of a smart contract by modifying the state storage.
 
 Hold on to your hat!
 
-##Contract:
+**Contract:**
 
 ```
 // SPDX-License-Identifier: MIT
@@ -51,7 +51,7 @@ contract Fallback {
 }
 ```
 
-##Learnings:
+**Learnings:**
 Fallback methods are the default way to interact with a contract. 
 
 
@@ -118,7 +118,7 @@ function contribute() public payable {
   }
 ```
 
-It looks like the only requirement here is to send less than 0.001 ether. Let's see how little we can get away with. Using the utility in our help(), we'll convert from 1 eth to wei, the smallest unit of eth. 
+It looks like the only requirement here is to send less than 0.001 ether. Let's see how little we can get away with. Using the utility in our help(), I'll show you 1 wei, the smallest unit of eth. 
 
 ![Alt text](wei.jpg)
 
