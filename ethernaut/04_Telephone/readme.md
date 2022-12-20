@@ -2,7 +2,7 @@
 
 ![Alt text](phone.jpg)
 
-Claim ownership of the contract below to complete this level.
+Claim ownership of the contract below to complete this level:
 
 ```
 pragma solidity ^0.8.0;
