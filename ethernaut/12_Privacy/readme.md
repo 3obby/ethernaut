@@ -51,7 +51,7 @@ constructor(bytes32[3] memory _data) {
   }
 ```
 
-This same array is what we'll need to investigate to find the key, which appears to be hidden in the 2nd element of the array:
+This same array is what we'll need to investigate to find the key, which appears to be hidden in the 3rd position of the array:
 ```
 require(_key == bytes16(data[2]));
 ```
