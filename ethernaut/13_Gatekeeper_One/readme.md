@@ -148,3 +148,39 @@ Knowing we'll need to pass in `22717` or `0x58BD`, we can simply expand the hex 
 Wonderful! That's all 3 of the normal gates; we know this key will work.
 
 Now we just need to deploy a contract to act as a proxy to fulfill the requirement `(msg.sender != tx.origin);`, and make sure that the `gasleft()` is perfectly divisible by 8191.
+
+This was pretty tough. Basically, there are two ways to approach this; the first is to run a test transaction, debug the execution, then inspect the remaining gas when the `gasleft()` command is executed...
+
+I failed to do this successfully, as the remix vm seems to modify the gas cost in a way that greatly differs from the actual implementation:
+![Alt text](gasCostExact.jpg)
+
+The alternative method, the lazy way, is to say 'okay, let's just keep spamming the function until it works'.
+
+```
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+interface target {
+function enter(bytes8 _key) external returns (bool);
+}
+
+contract Hack {
+function tryKey(bytes8 _key, address _addr)public returns(bool){
+
+for (uint256 i = 0; i < 300; i++) {
+            (bool success, ) = address(_addr).call{gas: i + (8191 * 3)}(abi.encodeWithSignature("enter(bytes8)", _key));
+            if (success) {
+                break;
+            }
+        }
+}
+}
+```
+
+This approach continues to call the `enter()` function, incrementing the gas value each time. Luckily for me, this worked on the first try, but I had anticipated a need to fiddle with the paramaters here. Also, when testing this, it actually crashed remix in my browser session because the vm ran out of memory.
+
+Anyway...
+
+After deploying the contract, calculating a valid key, and spamming guesses for the gas, we're in, baby! Look at this, I guess this is the challenge OZ thought would make a good benchmark for aspiring contract auditors. I might just apply, but I feel a bit guilty for not guessing the gas cost with surgical precision, ha!
+
+![Alt text](complete.jpg)
